@@ -1,0 +1,5243 @@
+{
+  "format": "bww-tokens",
+  "version": 1,
+  "description": "Machine-readable token tables for the BWW (Bagpipe Music Writer) file format. See SPEC.md.",
+  "license": "CC-BY-4.0",
+  "headerLines": [
+    "Bagpipe Reader:1.0 (or Bagpipe Music Writer Gold:1.0, Bagpipe Musicworks Gold:1.0)",
+    "MIDINoteMappings,(…)",
+    "FrequencyMappings,(…)",
+    "InstrumentMappings,(…)",
+    "GracenoteDurations,(…)",
+    "FontSizes,(…)",
+    "TuneFormat,(…)",
+    "TuneTempo,<beats per minute>"
+  ],
+  "textTags": [
+    {
+      "tag": "T",
+      "meaning": "Title",
+      "drawn": true
+    },
+    {
+      "tag": "Y",
+      "meaning": "Tune type, e.g. March, Strathspey",
+      "drawn": true
+    },
+    {
+      "tag": "M",
+      "meaning": "Composer or arranger",
+      "drawn": true
+    },
+    {
+      "tag": "F",
+      "meaning": "Footer, e.g. a band name or copyright (drawn when the layout has a footer)",
+      "drawn": true
+    },
+    {
+      "tag": "I",
+      "meaning": "Inline text above a staff, e.g. part or variation names",
+      "drawn": true
+    },
+    {
+      "tag": "X",
+      "meaning": "Free text placed at page coordinates",
+      "drawn": false
+    }
+  ],
+  "pitches": [
+    {
+      "token": "LG",
+      "lower": "lg",
+      "name": "Low G",
+      "letter": "G"
+    },
+    {
+      "token": "LA",
+      "lower": "la",
+      "name": "Low A",
+      "letter": "A"
+    },
+    {
+      "token": "B",
+      "lower": "b",
+      "name": "B",
+      "letter": "B"
+    },
+    {
+      "token": "C",
+      "lower": "c",
+      "name": "C",
+      "letter": "C"
+    },
+    {
+      "token": "D",
+      "lower": "d",
+      "name": "D",
+      "letter": "D"
+    },
+    {
+      "token": "E",
+      "lower": "e",
+      "name": "E",
+      "letter": "E"
+    },
+    {
+      "token": "F",
+      "lower": "f",
+      "name": "F",
+      "letter": "F"
+    },
+    {
+      "token": "HG",
+      "lower": "hg",
+      "name": "High G",
+      "letter": "HG"
+    },
+    {
+      "token": "HA",
+      "lower": "ha",
+      "name": "High A",
+      "letter": "HA"
+    }
+  ],
+  "durations": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "beamMarks": [
+    "",
+    "r",
+    "l"
+  ],
+  "patterns": [
+    {
+      "id": "note",
+      "regex": "^(LG|LA|[B-F]|HG|HA)([lr]?)_(1|2|4|8|16|32)$",
+      "meaning": "Melody note: pitch, optional beam mark (r starts or continues a beam, l ends it), then the written value (1 whole … 32 thirty-second).",
+      "context": "& 4_4 {token} !t",
+      "examples": [
+        "LG_4",
+        "Dr_8",
+        "El_16",
+        "HA_1",
+        "Cr_32"
+      ]
+    },
+    {
+      "id": "timeSignature",
+      "regex": "^(\\d{1,2})_(1|2|4|8|16|32)$",
+      "meaning": "Time signature, count_unit (2_4, 6_8 …). Usually right after the key signature on the first staff.",
+      "context": "& {token} D_4 !t",
+      "examples": [
+        "2_4",
+        "3_4",
+        "4_4",
+        "6_8",
+        "9_8",
+        "12_8",
+        "2_2",
+        "5_4"
+      ]
+    },
+    {
+      "id": "dot",
+      "regex": "^('{1,2})(lg|la|b|c|d|e|f|hg|ha)$",
+      "meaning": "Dot (') or double dot ('') on the note before it. The pitch is where the dot is drawn, which is often not the note's pitch; it is ignored.",
+      "context": "& 4_4 Dr_8 {token} El_16 F_4 HG_4 HA_4 !t",
+      "examples": [
+        "'d",
+        "''d",
+        "'e",
+        "'hg",
+        "'lg"
+      ]
+    },
+    {
+      "id": "rest",
+      "regex": "^REST_(1|2|4|8|16|32)$",
+      "meaning": "Rest of the written value.",
+      "context": "& 4_4 D_4 {token} !t",
+      "examples": [
+        "REST_4",
+        "REST_2",
+        "REST_8",
+        "REST_1"
+      ]
+    },
+    {
+      "id": "accidental",
+      "regex": "^(?:flat|natural|sharp)(?:lg|la|[b-f]|hg|ha)$",
+      "meaning": "Accidental on the next note. sharpf and sharpc at the start of a staff are the key signature instead. Letters ignore accidentals.",
+      "context": "& 4_4 {token} C_4 D_4 E_4 F_4 !t",
+      "examples": [
+        "naturalc",
+        "naturalf",
+        "flatc",
+        "flatb",
+        "sharpd",
+        "sharphg"
+      ]
+    },
+    {
+      "id": "fermata",
+      "regex": "^fermat(lg|la|b|c|d|e|f|hg|ha)$",
+      "meaning": "Fermata (pause) over the note before it.",
+      "context": "& 4_4 D_4 E_4 F_4 HG_4 {token} !t",
+      "examples": [
+        "fermathg",
+        "fermatd",
+        "fermatla"
+      ]
+    },
+    {
+      "id": "ending",
+      "regex": "^'([1-9]\\d{0,2})$",
+      "meaning": "Start of a first or second time ending. '1 first time, '2 second time, '22…'28 second of n (labelled 2 of 3), '224 second and fourth (2 of 2 & 4). Closed by _'.",
+      "context": "& 4_4 D_4 E_4 F_4 HG_4 ! {token} D_4 E_4 F_4 HG_4 _' !t",
+      "examples": [
+        "'1",
+        "'2",
+        "'22",
+        "'24",
+        "'224"
+      ]
+    },
+    {
+      "id": "tupletStart",
+      "regex": "^\\^([1-9])([1-9])?([se])$",
+      "meaning": "Tuplet bracket: ^3s … ^3e is a triplet (3 in the time of 2), ^2s … ^2e a duplet (2 in the time of 3), ^53s … ^53e five in the time of three.",
+      "context": "& 4_4 {token} Dr_8 E_8 Fl_8 ^3e HG_4 !t",
+      "examples": [
+        "^3s",
+        "^2s",
+        "^53s"
+      ]
+    },
+    {
+      "id": "oldTriplet",
+      "regex": "^\\^3(lg|la|b|c|d|e|f|hg|ha)$",
+      "meaning": "Old style triplet: closes a triplet of the three notes before it (the pitch is where the 3 is drawn).",
+      "context": "& 4_4 Dr_8 E_8 Fl_8 {token} HG_4 !t",
+      "examples": [
+        "^3f",
+        "^3hg",
+        "^3d"
+      ]
+    },
+    {
+      "id": "oldTie",
+      "regex": "^\\^t(lg|la|b|c|d|e|f|hg|ha)$",
+      "meaning": "Old style tie, written after the first of the two tied notes (the pitch is where the tie is drawn).",
+      "context": "& 4_4 HG_4 D_4 {token} D_4 F_4 !t",
+      "examples": [
+        "^td",
+        "^tla",
+        "^thg",
+        "^tc"
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "id": "staff",
+      "title": "Staves and key",
+      "tokens": [
+        {
+          "token": "&",
+          "meaning": "Starts a staff (one printed line of music). Each music line of the file begins with it.",
+          "example": "& 4_4 D_4 E_4 F_4 HG_4 ! & D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "sharpf",
+          "meaning": "Key signature sharp on F; written after & on every staff. Pipe tunes always have sharpf sharpc.",
+          "example": "& sharpf sharpc 4_4 D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "sharpc",
+          "meaning": "Key signature sharp on C.",
+          "example": "& sharpf sharpc 4_4 D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        }
+      ]
+    },
+    {
+      "id": "meter",
+      "title": "Time signatures",
+      "tokens": [
+        {
+          "token": "C",
+          "meaning": "Common time, read as 4/4.",
+          "example": "& C D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "C_",
+          "meaning": "Cut time, read as 2/2.",
+          "example": "& C_ D_2 E_2 !t",
+          "drawn": true
+        },
+        {
+          "token": "3_4",
+          "meaning": "A second time signature later in the tune (a meter change).",
+          "example": "& 2_4 D_4 E_4 ! 3_4 D_4 E_4 F_4 !t",
+          "drawn": true
+        }
+      ]
+    },
+    {
+      "id": "bars",
+      "title": "Barlines and repeats",
+      "tokens": [
+        {
+          "token": "!",
+          "meaning": "Barline.",
+          "example": "& 4_4 D_4 E_4 F_4 HG_4 ! D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "!t",
+          "meaning": "Barline that ends a staff line.",
+          "example": "& 4_4 D_4 E_4 F_4 HG_4 !t & D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "!!",
+          "meaning": "Double barline.",
+          "example": "& 4_4 D_4 E_4 F_4 HG_4 !! D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "!!t",
+          "meaning": "Double barline that ends a staff line.",
+          "example": "& 4_4 D_4 E_4 F_4 HG_4 !!t & D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "I!''",
+          "meaning": "Repeat start (barline with dots on the right).",
+          "example": "& 4_4 I!'' D_4 E_4 F_4 HG_4 ''!I",
+          "drawn": true
+        },
+        {
+          "token": "I!",
+          "meaning": "Repeat start without the dots in the token (same meaning as I!'').",
+          "example": "& 4_4 I! D_4 E_4 F_4 HG_4 ''!I",
+          "drawn": true
+        },
+        {
+          "token": "''!I",
+          "meaning": "Repeat end.",
+          "example": "& 4_4 D_4 E_4 F_4 HG_4 ! D_4 E_4 F_4 HG_4 ''!I & D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "''!It",
+          "meaning": "Repeat end that ends a staff line.",
+          "example": "& 4_4 D_4 E_4 F_4 HG_4 ''!It & D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "!I",
+          "meaning": "End of a part or the tune (thin-thick barline).",
+          "example": "& 4_4 D_4 E_4 F_4 HG_4 !I & D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "!It",
+          "meaning": "End barline that ends a staff line.",
+          "example": "& 4_4 D_4 E_4 F_4 HG_4 !It & D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        }
+      ]
+    },
+    {
+      "id": "endings",
+      "title": "Endings and brackets",
+      "tokens": [
+        {
+          "token": "'1",
+          "meaning": "First time ending starts.",
+          "example": "& 4_4 I!'' D_4 E_4 F_4 HG_4 ! '1 D_4 E_4 F_4 HG_4 _' ''!I '2 D_4 E_4 F_4 HG_4 _' !I",
+          "drawn": true
+        },
+        {
+          "token": "'2",
+          "meaning": "Second time ending starts.",
+          "example": "& 4_4 I!'' D_4 E_4 F_4 HG_4 ! '1 D_4 E_4 F_4 HG_4 _' ''!I '2 D_4 E_4 F_4 HG_4 _' !I",
+          "drawn": true
+        },
+        {
+          "token": "_'",
+          "meaning": "Closes the open ending, or else the open singling, doubling, bis or introduction bracket, at the end of its bar.",
+          "example": "& 4_4 D_4 E_4 F_4 HG_4 ! '2 D_4 E_4 F_4 HG_4 _' ! D_4 E_4 F_4 HG_4 !I",
+          "drawn": true
+        },
+        {
+          "token": "'si",
+          "meaning": "Singling bracket: drawn like an ending over the bars up to _'. Playback ignores it.",
+          "example": "& 4_4 'si D_4 E_4 F_4 HG_4 ! D_4 E_4 F_4 HG_4 _' ! D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "'do",
+          "meaning": "Doubling bracket, as 'si.",
+          "example": "& 4_4 'do D_4 E_4 F_4 HG_4 ! D_4 E_4 F_4 HG_4 _' ! D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "'intro",
+          "meaning": "Introduction bracket, as 'si.",
+          "example": "& 4_4 'intro D_4 E_4 F_4 HG_4 ! D_4 E_4 F_4 HG_4 _' ! D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "'bis",
+          "meaning": "Bis (play twice) bracket, closed by bis_' (sometimes _').",
+          "example": "& 4_4 'bis D_4 E_4 F_4 HG_4 ! D_4 E_4 F_4 HG_4 bis_' ! D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "bis_'",
+          "meaning": "Ends a bis bracket. Some files also write it inside endings, where it changes nothing.",
+          "example": "& 4_4 'bis D_4 E_4 F_4 HG_4 bis_' ! D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        }
+      ]
+    },
+    {
+      "id": "ties",
+      "title": "Ties and tuplets",
+      "tokens": [
+        {
+          "token": "^ts",
+          "meaning": "Tie start, before the first tied note.",
+          "example": "& 4_4 HG_4 ^ts E_4 E_4 ^te F_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "^te",
+          "meaning": "Tie end, after the second tied note.",
+          "example": "& 4_4 HG_4 ^ts E_4 E_4 ^te F_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "^3s",
+          "meaning": "Triplet starts.",
+          "example": "& 2_4 ^3s Dr_8 E_8 Fl_8 ^3e HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "^3e",
+          "meaning": "Triplet ends.",
+          "example": "& 2_4 ^3s Dr_8 E_8 Fl_8 ^3e HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "^2s",
+          "meaning": "Duplet starts (2 in the time of 3).",
+          "example": "& 6_8 ^2s Dr_8 El_8 ^2e HG_4 'hg !t",
+          "drawn": true
+        }
+      ]
+    },
+    {
+      "id": "rests",
+      "title": "Rest aliases",
+      "tokens": [
+        {
+          "token": "wrst",
+          "meaning": "Whole rest (an alias of REST_1 seen in real files).",
+          "example": "& 4_4 D_4 E_4 F_4 HG_4 ! wrst !t",
+          "drawn": true
+        },
+        {
+          "token": "hrst",
+          "meaning": "Half rest (an alias of REST_2 seen in real files).",
+          "example": "& 4_4 D_4 E_4 hrst !t",
+          "drawn": true
+        }
+      ]
+    },
+    {
+      "id": "marks",
+      "title": "Accidentals and fermatas",
+      "tokens": [
+        {
+          "token": "naturalc",
+          "meaning": "Natural on the next C.",
+          "example": "& 4_4 naturalc C_4 D_4 E_4 F_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "naturalf",
+          "meaning": "Natural on the next F.",
+          "example": "& 4_4 naturalf F_4 D_4 E_4 C_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "cnat",
+          "meaning": "An alias of naturalc seen in real files.",
+          "example": "& 4_4 cnat C_4 D_4 E_4 F_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "flatc",
+          "meaning": "Flat on the next C.",
+          "example": "& 4_4 flatc C_4 D_4 E_4 F_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "fermatd",
+          "meaning": "Fermata on the D before it.",
+          "example": "& 4_4 HG_4 E_4 F_4 D_4 fermatd !t",
+          "drawn": true
+        }
+      ]
+    },
+    {
+      "id": "text",
+      "title": "Text marks",
+      "tokens": [
+        {
+          "token": "fine",
+          "meaning": "Fine (end here after the da capo).",
+          "example": "& 4_4 D_4 E_4 F_4 HG_4 !t & D_4 E_4 F_4 HG_4 fine !I",
+          "drawn": true
+        },
+        {
+          "token": "dacapoalfine",
+          "meaning": "D.C. al Fine.",
+          "example": "& 4_4 D_4 E_4 F_4 HG_4 !t & D_4 E_4 F_4 HG_4 dacapoalfine !I",
+          "drawn": true
+        },
+        {
+          "token": "dalsegno",
+          "meaning": "D.S. (back to the segno).",
+          "example": "& 4_4 D_4 E_4 F_4 HG_4 !t & D_4 E_4 F_4 HG_4 dalsegno !I",
+          "drawn": true
+        },
+        {
+          "token": "dacapoalcoda",
+          "meaning": "D.C. al Coda.",
+          "example": "& 4_4 D_4 E_4 F_4 HG_4 !t & D_4 E_4 F_4 HG_4 dacapoalcoda !I",
+          "drawn": true
+        },
+        {
+          "token": "segno",
+          "meaning": "Segno sign.",
+          "example": "& 4_4 segno D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "coda",
+          "meaning": "Coda sign.",
+          "example": "& 4_4 coda D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "codasection",
+          "meaning": "Coda sign where the coda section starts (drawn as coda).",
+          "example": "& 4_4 codasection D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        }
+      ]
+    },
+    {
+      "id": "abbreviations",
+      "title": "Piobaireachd abbreviations",
+      "tokens": [
+        {
+          "token": "pt",
+          "meaning": "Taorluath abbreviation: a T under the note before. ptb, phtla, ptlg, ptbrea and the other pt…/pht… names draw the same.",
+          "example": "& 4_4 LA_4 pt E_4 C_4 LA_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "pc",
+          "meaning": "Crunluath abbreviation: a c under the note before. pcb, phcla, pclg and the other pc…/phc… names draw the same.",
+          "example": "& 4_4 LA_4 pc E_4 C_4 LA_4 !t",
+          "drawn": true
+        },
+        {
+          "token": "pl",
+          "meaning": "Lemluath abbreviation: an L under the note before. plb, phlla and the other pl…/phl… names draw the same.",
+          "example": "& 4_4 LA_4 pl E_4 C_4 LA_4 !t",
+          "drawn": true
+        }
+      ]
+    },
+    {
+      "id": "layout",
+      "title": "Layout and quirks",
+      "tokens": [
+        {
+          "token": "space",
+          "meaning": "Extra horizontal space (Bagpipe Music Writer layout only).",
+          "example": "& 4_4 D_4 space E_4 F_4 HG_4 !t",
+          "drawn": false
+        },
+        {
+          "token": "!gg",
+          "meaning": "A barline typed with no space before the next note's gracenote; read as ! then gg.",
+          "example": "& 4_4 D_4 E_4 F_4 HG_4 !gg D_4 E_4 F_4 HG_4 !t",
+          "drawn": true
+        }
+      ]
+    }
+  ],
+  "embellishments": [
+    {
+      "name": "ag",
+      "graces": [
+        "LA"
+      ],
+      "family": "Single gracenotes",
+      "beforeD": "D",
+      "canonical": "ag",
+      "corpusUses": 1140
+    },
+    {
+      "name": "bg",
+      "graces": [
+        "B"
+      ],
+      "family": "Single gracenotes",
+      "beforeD": "D",
+      "canonical": "bg",
+      "corpusUses": 47
+    },
+    {
+      "name": "cg",
+      "graces": [
+        "C"
+      ],
+      "family": "Single gracenotes",
+      "beforeD": "D",
+      "canonical": "cg",
+      "corpusUses": 626
+    },
+    {
+      "name": "dg",
+      "graces": [
+        "D"
+      ],
+      "family": "Single gracenotes",
+      "beforeD": "D",
+      "canonical": "dg",
+      "corpusUses": 29960
+    },
+    {
+      "name": "eg",
+      "graces": [
+        "E"
+      ],
+      "family": "Single gracenotes",
+      "beforeD": "D",
+      "canonical": "eg",
+      "corpusUses": 18619
+    },
+    {
+      "name": "fg",
+      "graces": [
+        "F"
+      ],
+      "family": "Single gracenotes",
+      "beforeD": "D",
+      "canonical": "fg",
+      "corpusUses": 656
+    },
+    {
+      "name": "gg",
+      "graces": [
+        "HG"
+      ],
+      "family": "Single gracenotes",
+      "beforeD": "D",
+      "canonical": "gg",
+      "corpusUses": 138634
+    },
+    {
+      "name": "tg",
+      "graces": [
+        "HA"
+      ],
+      "family": "Single gracenotes",
+      "beforeD": "D",
+      "canonical": "tg",
+      "corpusUses": 11932
+    },
+    {
+      "name": "dblg",
+      "graces": [
+        "HG",
+        "LG",
+        "D"
+      ],
+      "family": "Doublings",
+      "beforeD": "D",
+      "canonical": "dblg",
+      "corpusUses": 357
+    },
+    {
+      "name": "dbla",
+      "graces": [
+        "HG",
+        "LA",
+        "D"
+      ],
+      "family": "Doublings",
+      "beforeD": "D",
+      "canonical": "dbla",
+      "corpusUses": 443
+    },
+    {
+      "name": "dbb",
+      "graces": [
+        "HG",
+        "B",
+        "D"
+      ],
+      "family": "Doublings",
+      "beforeD": "D",
+      "canonical": "dbb",
+      "corpusUses": 5964
+    },
+    {
+      "name": "dbc",
+      "graces": [
+        "HG",
+        "C",
+        "D"
+      ],
+      "family": "Doublings",
+      "beforeD": "D",
+      "canonical": "dbc",
+      "corpusUses": 10390
+    },
+    {
+      "name": "dbd",
+      "graces": [
+        "HG",
+        "D",
+        "E"
+      ],
+      "family": "Doublings",
+      "beforeD": "D",
+      "canonical": "dbd",
+      "corpusUses": 3611
+    },
+    {
+      "name": "dbe",
+      "graces": [
+        "HG",
+        "E",
+        "F"
+      ],
+      "family": "Doublings",
+      "beforeD": "D",
+      "canonical": "dbe",
+      "corpusUses": 18295
+    },
+    {
+      "name": "dbf",
+      "graces": [
+        "HG",
+        "F",
+        "HG"
+      ],
+      "family": "Doublings",
+      "beforeD": "D",
+      "canonical": "dbf",
+      "corpusUses": 6013
+    },
+    {
+      "name": "dbhg",
+      "graces": [
+        "HG",
+        "F"
+      ],
+      "family": "Doublings",
+      "beforeD": "D",
+      "canonical": "dbhg",
+      "corpusUses": 6822
+    },
+    {
+      "name": "dbha",
+      "graces": [
+        "HA",
+        "HG"
+      ],
+      "family": "Doublings",
+      "beforeD": "D",
+      "canonical": "dbha",
+      "corpusUses": 8903
+    },
+    {
+      "name": "tdblg",
+      "graces": [
+        "HA",
+        "LG",
+        "D"
+      ],
+      "family": "Thumb doublings",
+      "beforeD": "D",
+      "canonical": "tdblg",
+      "corpusUses": 9
+    },
+    {
+      "name": "tdbla",
+      "graces": [
+        "HA",
+        "LA",
+        "D"
+      ],
+      "family": "Thumb doublings",
+      "beforeD": "D",
+      "canonical": "tdbla",
+      "corpusUses": 1
+    },
+    {
+      "name": "tdbb",
+      "graces": [
+        "HA",
+        "B",
+        "D"
+      ],
+      "family": "Thumb doublings",
+      "beforeD": "D",
+      "canonical": "tdbb",
+      "corpusUses": 82
+    },
+    {
+      "name": "tdbc",
+      "graces": [
+        "HA",
+        "C",
+        "D"
+      ],
+      "family": "Thumb doublings",
+      "beforeD": "D",
+      "canonical": "tdbc",
+      "corpusUses": 8
+    },
+    {
+      "name": "tdbd",
+      "graces": [
+        "HA",
+        "D",
+        "E"
+      ],
+      "family": "Thumb doublings",
+      "beforeD": "D",
+      "canonical": "tdbd",
+      "corpusUses": 22
+    },
+    {
+      "name": "tdbe",
+      "graces": [
+        "HA",
+        "E",
+        "F"
+      ],
+      "family": "Thumb doublings",
+      "beforeD": "D",
+      "canonical": "tdbe",
+      "corpusUses": 109
+    },
+    {
+      "name": "tdbf",
+      "graces": [
+        "HA",
+        "F",
+        "HG"
+      ],
+      "family": "Thumb doublings",
+      "beforeD": "D",
+      "canonical": "tdbf",
+      "corpusUses": 544
+    },
+    {
+      "name": "hdblg",
+      "graces": [
+        "LG",
+        "D"
+      ],
+      "family": "Half doublings",
+      "beforeD": "D",
+      "canonical": "hdblg",
+      "corpusUses": 21
+    },
+    {
+      "name": "hdbla",
+      "graces": [
+        "LA",
+        "D"
+      ],
+      "family": "Half doublings",
+      "beforeD": "D",
+      "canonical": "hdbla",
+      "corpusUses": 17
+    },
+    {
+      "name": "hdbb",
+      "graces": [
+        "B",
+        "D"
+      ],
+      "family": "Half doublings",
+      "beforeD": "D",
+      "canonical": "hdbb",
+      "corpusUses": 311
+    },
+    {
+      "name": "hdbc",
+      "graces": [
+        "C",
+        "D"
+      ],
+      "family": "Half doublings",
+      "beforeD": "D",
+      "canonical": "hdbc",
+      "corpusUses": 888
+    },
+    {
+      "name": "hdbd",
+      "graces": [
+        "D",
+        "E"
+      ],
+      "family": "Half doublings",
+      "beforeD": "D",
+      "canonical": "hdbd",
+      "corpusUses": 148
+    },
+    {
+      "name": "hdbe",
+      "graces": [
+        "E",
+        "F"
+      ],
+      "family": "Half doublings",
+      "beforeD": "D",
+      "canonical": "hdbe",
+      "corpusUses": 2167
+    },
+    {
+      "name": "hdbf",
+      "graces": [
+        "F",
+        "HG"
+      ],
+      "family": "Half doublings",
+      "beforeD": "D",
+      "canonical": "hdbf",
+      "corpusUses": 3871
+    },
+    {
+      "name": "strlg",
+      "graces": [
+        "LG"
+      ],
+      "family": "Strikes (single gracenote)",
+      "beforeD": "D",
+      "canonical": "strlg",
+      "corpusUses": 12599
+    },
+    {
+      "name": "strla",
+      "graces": [
+        "LA"
+      ],
+      "family": "Strikes (single gracenote)",
+      "beforeD": "D",
+      "canonical": "ag",
+      "corpusUses": 7102
+    },
+    {
+      "name": "strb",
+      "graces": [
+        "B"
+      ],
+      "family": "Strikes (single gracenote)",
+      "beforeD": "D",
+      "canonical": "bg",
+      "corpusUses": 34
+    },
+    {
+      "name": "strc",
+      "graces": [
+        "C"
+      ],
+      "family": "Strikes (single gracenote)",
+      "beforeD": "D",
+      "canonical": "cg",
+      "corpusUses": 1591
+    },
+    {
+      "name": "strd",
+      "graces": [
+        "D"
+      ],
+      "family": "Strikes (single gracenote)",
+      "beforeD": "D",
+      "canonical": "dg",
+      "corpusUses": 125
+    },
+    {
+      "name": "stre",
+      "graces": [
+        "E"
+      ],
+      "family": "Strikes (single gracenote)",
+      "beforeD": "D",
+      "canonical": "eg",
+      "corpusUses": 1267
+    },
+    {
+      "name": "strf",
+      "graces": [
+        "F"
+      ],
+      "family": "Strikes (single gracenote)",
+      "beforeD": "D",
+      "canonical": "fg",
+      "corpusUses": 1325
+    },
+    {
+      "name": "strhg",
+      "graces": [
+        "HG"
+      ],
+      "family": "Strikes (single gracenote)",
+      "beforeD": "D",
+      "canonical": "gg",
+      "corpusUses": 2792
+    },
+    {
+      "name": "gstla",
+      "graces": [
+        "HG",
+        "LA",
+        "LG"
+      ],
+      "family": "G-gracenote strikes",
+      "beforeD": "DS",
+      "canonical": "gstla",
+      "corpusUses": 8
+    },
+    {
+      "name": "gstb",
+      "graces": [
+        "HG",
+        "B",
+        "LG"
+      ],
+      "family": "G-gracenote strikes",
+      "beforeD": "DS",
+      "canonical": "gstb",
+      "corpusUses": 729
+    },
+    {
+      "name": "gstc",
+      "graces": [
+        "HG",
+        "C",
+        "LG"
+      ],
+      "family": "G-gracenote strikes",
+      "beforeD": "DS",
+      "canonical": "gstc",
+      "corpusUses": 68
+    },
+    {
+      "name": "gstd",
+      "graces": [
+        "HG",
+        "D",
+        "LG"
+      ],
+      "family": "G-gracenote strikes",
+      "beforeD": "DS",
+      "canonical": "gstd",
+      "corpusUses": 1109
+    },
+    {
+      "name": "lgstd",
+      "graces": [
+        "HG",
+        "D",
+        "C"
+      ],
+      "family": "G-gracenote strikes",
+      "beforeD": "D",
+      "canonical": "lgstd",
+      "corpusUses": 1885
+    },
+    {
+      "name": "gste",
+      "graces": [
+        "HG",
+        "E",
+        "LA"
+      ],
+      "family": "G-gracenote strikes",
+      "beforeD": "D",
+      "canonical": "gste",
+      "corpusUses": 14
+    },
+    {
+      "name": "gstf",
+      "graces": [
+        "HG",
+        "F",
+        "E"
+      ],
+      "family": "G-gracenote strikes",
+      "beforeD": "D",
+      "canonical": "gstf",
+      "corpusUses": 14
+    },
+    {
+      "name": "tstla",
+      "graces": [
+        "HA",
+        "LA",
+        "LG"
+      ],
+      "family": "Thumb strikes",
+      "beforeD": "D",
+      "canonical": "tstla",
+      "corpusUses": 0
+    },
+    {
+      "name": "tstb",
+      "graces": [
+        "HA",
+        "B",
+        "LG"
+      ],
+      "family": "Thumb strikes",
+      "beforeD": "D",
+      "canonical": "tstb",
+      "corpusUses": 22
+    },
+    {
+      "name": "tstc",
+      "graces": [
+        "HA",
+        "C",
+        "LG"
+      ],
+      "family": "Thumb strikes",
+      "beforeD": "D",
+      "canonical": "tstc",
+      "corpusUses": 0
+    },
+    {
+      "name": "tstd",
+      "graces": [
+        "HA",
+        "D",
+        "LG"
+      ],
+      "family": "Thumb strikes",
+      "beforeD": "D",
+      "canonical": "tstd",
+      "corpusUses": 9
+    },
+    {
+      "name": "ltstd",
+      "graces": [
+        "HA",
+        "D",
+        "C"
+      ],
+      "family": "Thumb strikes",
+      "beforeD": "D",
+      "canonical": "ltstd",
+      "corpusUses": 11
+    },
+    {
+      "name": "tste",
+      "graces": [
+        "HA",
+        "E",
+        "LA"
+      ],
+      "family": "Thumb strikes",
+      "beforeD": "D",
+      "canonical": "tste",
+      "corpusUses": 10
+    },
+    {
+      "name": "tstf",
+      "graces": [
+        "HA",
+        "F",
+        "E"
+      ],
+      "family": "Thumb strikes",
+      "beforeD": "D",
+      "canonical": "tstf",
+      "corpusUses": 0
+    },
+    {
+      "name": "tsthg",
+      "graces": [
+        "HA",
+        "HG",
+        "F"
+      ],
+      "family": "Thumb strikes",
+      "beforeD": "D",
+      "canonical": "tsthg",
+      "corpusUses": 9
+    },
+    {
+      "name": "hstla",
+      "graces": [
+        "LA",
+        "LG"
+      ],
+      "family": "Half strikes",
+      "beforeD": "D",
+      "canonical": "hstla",
+      "corpusUses": 1
+    },
+    {
+      "name": "hstb",
+      "graces": [
+        "B",
+        "LG"
+      ],
+      "family": "Half strikes",
+      "beforeD": "D",
+      "canonical": "hstb",
+      "corpusUses": 142
+    },
+    {
+      "name": "hstc",
+      "graces": [
+        "C",
+        "LG"
+      ],
+      "family": "Half strikes",
+      "beforeD": "D",
+      "canonical": "hstc",
+      "corpusUses": 49
+    },
+    {
+      "name": "hstd",
+      "graces": [
+        "D",
+        "LG"
+      ],
+      "family": "Half strikes",
+      "beforeD": "D",
+      "canonical": "hstd",
+      "corpusUses": 29
+    },
+    {
+      "name": "lhstd",
+      "graces": [
+        "D",
+        "C"
+      ],
+      "family": "Half strikes",
+      "beforeD": "D",
+      "canonical": "lhstd",
+      "corpusUses": 233
+    },
+    {
+      "name": "hste",
+      "graces": [
+        "E",
+        "LA"
+      ],
+      "family": "Half strikes",
+      "beforeD": "D",
+      "canonical": "hste",
+      "corpusUses": 8
+    },
+    {
+      "name": "hstf",
+      "graces": [
+        "F",
+        "E"
+      ],
+      "family": "Half strikes",
+      "beforeD": "D",
+      "canonical": "hstf",
+      "corpusUses": 11
+    },
+    {
+      "name": "hsthg",
+      "graces": [
+        "HG",
+        "F"
+      ],
+      "family": "Half strikes",
+      "beforeD": "D",
+      "canonical": "dbhg",
+      "corpusUses": 14
+    },
+    {
+      "name": "grp",
+      "graces": [
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Grips",
+      "beforeD": "D",
+      "canonical": "grp",
+      "corpusUses": 6749
+    },
+    {
+      "name": "hgrp",
+      "graces": [
+        "D",
+        "LG"
+      ],
+      "family": "Grips",
+      "beforeD": "D",
+      "canonical": "hstd",
+      "corpusUses": 0
+    },
+    {
+      "name": "grpb",
+      "graces": [
+        "LG",
+        "B",
+        "LG"
+      ],
+      "family": "Grips",
+      "beforeD": "D",
+      "canonical": "grpb",
+      "corpusUses": 275
+    },
+    {
+      "name": "ggrpla",
+      "graces": [
+        "HG",
+        "LA",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "G-gracenote grips",
+      "beforeD": "DS",
+      "canonical": "ggrpla",
+      "corpusUses": 0
+    },
+    {
+      "name": "ggrpb",
+      "graces": [
+        "HG",
+        "B",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "G-gracenote grips",
+      "beforeD": "DS",
+      "canonical": "ggrpb",
+      "corpusUses": 58
+    },
+    {
+      "name": "ggrpc",
+      "graces": [
+        "HG",
+        "C",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "G-gracenote grips",
+      "beforeD": "DS",
+      "canonical": "ggrpc",
+      "corpusUses": 31
+    },
+    {
+      "name": "ggrpd",
+      "graces": [
+        "HG",
+        "D",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "G-gracenote grips",
+      "beforeD": "DS",
+      "canonical": "ggrpd",
+      "corpusUses": 0
+    },
+    {
+      "name": "ggrpdb",
+      "graces": [
+        "HG",
+        "D",
+        "LG",
+        "B",
+        "LG"
+      ],
+      "family": "G-gracenote grips",
+      "beforeD": "DS",
+      "canonical": "ggrpdb",
+      "corpusUses": 0
+    },
+    {
+      "name": "ggrpe",
+      "graces": [
+        "HG",
+        "E",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "G-gracenote grips",
+      "beforeD": "DS",
+      "canonical": "ggrpe",
+      "corpusUses": 0
+    },
+    {
+      "name": "ggrpf",
+      "graces": [
+        "HG",
+        "F",
+        "LG",
+        "F",
+        "LG"
+      ],
+      "family": "G-gracenote grips",
+      "beforeD": "DS",
+      "canonical": "ggrpf",
+      "corpusUses": 0
+    },
+    {
+      "name": "tgrpla",
+      "graces": [
+        "HA",
+        "LA",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Thumb grips",
+      "beforeD": "D",
+      "canonical": "tgrpla",
+      "corpusUses": 0
+    },
+    {
+      "name": "tgrpb",
+      "graces": [
+        "HA",
+        "B",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Thumb grips",
+      "beforeD": "D",
+      "canonical": "tgrpb",
+      "corpusUses": 10
+    },
+    {
+      "name": "tgrpc",
+      "graces": [
+        "HA",
+        "C",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Thumb grips",
+      "beforeD": "D",
+      "canonical": "tgrpc",
+      "corpusUses": 0
+    },
+    {
+      "name": "tgrpd",
+      "graces": [
+        "HA",
+        "D",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Thumb grips",
+      "beforeD": "D",
+      "canonical": "tgrpd",
+      "corpusUses": 0
+    },
+    {
+      "name": "tgrpdb",
+      "graces": [
+        "HA",
+        "D",
+        "LG",
+        "B",
+        "LG"
+      ],
+      "family": "Thumb grips",
+      "beforeD": "D",
+      "canonical": "tgrpdb",
+      "corpusUses": 0
+    },
+    {
+      "name": "tgrpe",
+      "graces": [
+        "HA",
+        "E",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Thumb grips",
+      "beforeD": "D",
+      "canonical": "tgrpe",
+      "corpusUses": 1
+    },
+    {
+      "name": "tgrpf",
+      "graces": [
+        "HA",
+        "F",
+        "LG",
+        "F",
+        "LG"
+      ],
+      "family": "Thumb grips",
+      "beforeD": "D",
+      "canonical": "tgrpf",
+      "corpusUses": 0
+    },
+    {
+      "name": "tgrphg",
+      "graces": [
+        "HA",
+        "HG",
+        "LG",
+        "F",
+        "LG"
+      ],
+      "family": "Thumb grips",
+      "beforeD": "D",
+      "canonical": "tgrphg",
+      "corpusUses": 0
+    },
+    {
+      "name": "hgrpla",
+      "graces": [
+        "LA",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Half grips",
+      "beforeD": "D",
+      "canonical": "hgrpla",
+      "corpusUses": 0
+    },
+    {
+      "name": "hgrpb",
+      "graces": [
+        "B",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Half grips",
+      "beforeD": "D",
+      "canonical": "hgrpb",
+      "corpusUses": 7
+    },
+    {
+      "name": "hgrpc",
+      "graces": [
+        "C",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Half grips",
+      "beforeD": "D",
+      "canonical": "hgrpc",
+      "corpusUses": 38
+    },
+    {
+      "name": "hgrpd",
+      "graces": [
+        "D",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Half grips",
+      "beforeD": "D",
+      "canonical": "hgrpd",
+      "corpusUses": 2
+    },
+    {
+      "name": "hgrpdb",
+      "graces": [
+        "D",
+        "LG",
+        "B",
+        "LG"
+      ],
+      "family": "Half grips",
+      "beforeD": "D",
+      "canonical": "hgrpdb",
+      "corpusUses": 2
+    },
+    {
+      "name": "hgrpe",
+      "graces": [
+        "E",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Half grips",
+      "beforeD": "D",
+      "canonical": "hgrpe",
+      "corpusUses": 0
+    },
+    {
+      "name": "hgrpf",
+      "graces": [
+        "F",
+        "LG",
+        "F",
+        "LG"
+      ],
+      "family": "Half grips",
+      "beforeD": "D",
+      "canonical": "hgrpf",
+      "corpusUses": 0
+    },
+    {
+      "name": "hgrphg",
+      "graces": [
+        "HG",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Half grips",
+      "beforeD": "DS",
+      "canonical": "hgrphg",
+      "corpusUses": 5
+    },
+    {
+      "name": "hgrpha",
+      "graces": [
+        "HA",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Half grips",
+      "beforeD": "D",
+      "canonical": "hgrpha",
+      "corpusUses": 0
+    },
+    {
+      "name": "tar",
+      "graces": [
+        "LG",
+        "D",
+        "LG",
+        "E"
+      ],
+      "family": "Taorluaths and bubblys",
+      "beforeD": "D",
+      "canonical": "tar",
+      "corpusUses": 3633
+    },
+    {
+      "name": "tarb",
+      "graces": [
+        "LG",
+        "B",
+        "LG",
+        "E"
+      ],
+      "family": "Taorluaths and bubblys",
+      "beforeD": "D",
+      "canonical": "tarb",
+      "corpusUses": 20
+    },
+    {
+      "name": "htar",
+      "graces": [
+        "D",
+        "LG",
+        "E"
+      ],
+      "family": "Taorluaths and bubblys",
+      "beforeD": "D",
+      "canonical": "htar",
+      "corpusUses": 3
+    },
+    {
+      "name": "bubly",
+      "graces": [
+        "LG",
+        "D",
+        "LG",
+        "C",
+        "LG"
+      ],
+      "family": "Taorluaths and bubblys",
+      "beforeD": "D",
+      "canonical": "bubly",
+      "corpusUses": 54
+    },
+    {
+      "name": "hbubly",
+      "graces": [
+        "D",
+        "LG",
+        "C",
+        "LG"
+      ],
+      "family": "Taorluaths and bubblys",
+      "beforeD": "D",
+      "canonical": "hbubly",
+      "corpusUses": 33
+    },
+    {
+      "name": "brl",
+      "graces": [
+        "LG",
+        "LA",
+        "LG"
+      ],
+      "family": "Birls",
+      "beforeD": "D",
+      "canonical": "brl",
+      "corpusUses": 5199
+    },
+    {
+      "name": "abr",
+      "graces": [
+        "LA",
+        "LG",
+        "LA",
+        "LG"
+      ],
+      "family": "Birls",
+      "beforeD": "D",
+      "canonical": "abr",
+      "corpusUses": 1975
+    },
+    {
+      "name": "gbr",
+      "graces": [
+        "HG",
+        "LA",
+        "LG",
+        "LA",
+        "LG"
+      ],
+      "family": "Birls",
+      "beforeD": "DS",
+      "canonical": "gbr",
+      "corpusUses": 4173
+    },
+    {
+      "name": "tbr",
+      "graces": [
+        "HA",
+        "LA",
+        "LG",
+        "LA",
+        "LG"
+      ],
+      "family": "Birls",
+      "beforeD": "D",
+      "canonical": "tbr",
+      "corpusUses": 2
+    },
+    {
+      "name": "thrd",
+      "graces": [
+        "LG",
+        "D",
+        "C"
+      ],
+      "family": "D throws",
+      "beforeD": "DT",
+      "canonical": "thrd",
+      "corpusUses": 14999
+    },
+    {
+      "name": "hvthrd",
+      "graces": [
+        "LG",
+        "D",
+        "LG",
+        "C"
+      ],
+      "family": "D throws",
+      "beforeD": "DT",
+      "canonical": "hvthrd",
+      "corpusUses": 69
+    },
+    {
+      "name": "hthrd",
+      "graces": [
+        "D",
+        "C"
+      ],
+      "family": "D throws",
+      "beforeD": "D",
+      "canonical": "lhstd",
+      "corpusUses": 46
+    },
+    {
+      "name": "hhvthrd",
+      "graces": [
+        "D",
+        "LG",
+        "C"
+      ],
+      "family": "D throws",
+      "beforeD": "D",
+      "canonical": "hhvthrd",
+      "corpusUses": 0
+    },
+    {
+      "name": "pella",
+      "graces": [
+        "HG",
+        "LA",
+        "E",
+        "LA",
+        "LG"
+      ],
+      "family": "Peles",
+      "beforeD": "DS",
+      "canonical": "pella",
+      "corpusUses": 30
+    },
+    {
+      "name": "pelb",
+      "graces": [
+        "HG",
+        "B",
+        "E",
+        "B",
+        "LG"
+      ],
+      "family": "Peles",
+      "beforeD": "DS",
+      "canonical": "pelb",
+      "corpusUses": 523
+    },
+    {
+      "name": "pelc",
+      "graces": [
+        "HG",
+        "C",
+        "E",
+        "C",
+        "LG"
+      ],
+      "family": "Peles",
+      "beforeD": "DS",
+      "canonical": "pelc",
+      "corpusUses": 693
+    },
+    {
+      "name": "peld",
+      "graces": [
+        "HG",
+        "D",
+        "E",
+        "D",
+        "LG"
+      ],
+      "family": "Peles",
+      "beforeD": "DS",
+      "canonical": "peld",
+      "corpusUses": 504
+    },
+    {
+      "name": "lpeld",
+      "graces": [
+        "HG",
+        "D",
+        "E",
+        "D",
+        "C"
+      ],
+      "family": "Peles",
+      "beforeD": "D",
+      "canonical": "lpeld",
+      "corpusUses": 397
+    },
+    {
+      "name": "pele",
+      "graces": [
+        "HG",
+        "E",
+        "F",
+        "E",
+        "LA"
+      ],
+      "family": "Peles",
+      "beforeD": "D",
+      "canonical": "pele",
+      "corpusUses": 109
+    },
+    {
+      "name": "pelf",
+      "graces": [
+        "HG",
+        "F",
+        "HG",
+        "F",
+        "E"
+      ],
+      "family": "Peles",
+      "beforeD": "D",
+      "canonical": "pelf",
+      "corpusUses": 8
+    },
+    {
+      "name": "tpella",
+      "graces": [
+        "HA",
+        "LA",
+        "E",
+        "LA",
+        "LG"
+      ],
+      "family": "Thumb peles",
+      "beforeD": "D",
+      "canonical": "tpella",
+      "corpusUses": 0
+    },
+    {
+      "name": "tpelb",
+      "graces": [
+        "HA",
+        "B",
+        "E",
+        "B",
+        "LG"
+      ],
+      "family": "Thumb peles",
+      "beforeD": "D",
+      "canonical": "tpelb",
+      "corpusUses": 3
+    },
+    {
+      "name": "tpelc",
+      "graces": [
+        "HA",
+        "C",
+        "E",
+        "C",
+        "LG"
+      ],
+      "family": "Thumb peles",
+      "beforeD": "D",
+      "canonical": "tpelc",
+      "corpusUses": 0
+    },
+    {
+      "name": "tpeld",
+      "graces": [
+        "HA",
+        "D",
+        "E",
+        "D",
+        "LG"
+      ],
+      "family": "Thumb peles",
+      "beforeD": "D",
+      "canonical": "tpeld",
+      "corpusUses": 5
+    },
+    {
+      "name": "ltpeld",
+      "graces": [
+        "HA",
+        "D",
+        "E",
+        "D",
+        "C"
+      ],
+      "family": "Thumb peles",
+      "beforeD": "D",
+      "canonical": "ltpeld",
+      "corpusUses": 0
+    },
+    {
+      "name": "tpele",
+      "graces": [
+        "HA",
+        "E",
+        "F",
+        "E",
+        "LA"
+      ],
+      "family": "Thumb peles",
+      "beforeD": "D",
+      "canonical": "tpele",
+      "corpusUses": 0
+    },
+    {
+      "name": "tpelf",
+      "graces": [
+        "HA",
+        "F",
+        "HG",
+        "F",
+        "E"
+      ],
+      "family": "Thumb peles",
+      "beforeD": "D",
+      "canonical": "tpelf",
+      "corpusUses": 0
+    },
+    {
+      "name": "tpelhg",
+      "graces": [
+        "HA",
+        "HG",
+        "HA",
+        "HG",
+        "F"
+      ],
+      "family": "Thumb peles",
+      "beforeD": "D",
+      "canonical": "tpelhg",
+      "corpusUses": 0
+    },
+    {
+      "name": "hpella",
+      "graces": [
+        "LA",
+        "E",
+        "LA",
+        "LG"
+      ],
+      "family": "Half peles",
+      "beforeD": "D",
+      "canonical": "hpella",
+      "corpusUses": 0
+    },
+    {
+      "name": "hpelb",
+      "graces": [
+        "B",
+        "E",
+        "B",
+        "LG"
+      ],
+      "family": "Half peles",
+      "beforeD": "D",
+      "canonical": "hpelb",
+      "corpusUses": 14
+    },
+    {
+      "name": "hpelc",
+      "graces": [
+        "C",
+        "E",
+        "C",
+        "LG"
+      ],
+      "family": "Half peles",
+      "beforeD": "D",
+      "canonical": "hpelc",
+      "corpusUses": 8
+    },
+    {
+      "name": "hpeld",
+      "graces": [
+        "D",
+        "E",
+        "D",
+        "LG"
+      ],
+      "family": "Half peles",
+      "beforeD": "D",
+      "canonical": "hpeld",
+      "corpusUses": 13
+    },
+    {
+      "name": "lhpeld",
+      "graces": [
+        "D",
+        "E",
+        "D",
+        "C"
+      ],
+      "family": "Half peles",
+      "beforeD": "D",
+      "canonical": "lhpeld",
+      "corpusUses": 4
+    },
+    {
+      "name": "hpele",
+      "graces": [
+        "E",
+        "F",
+        "E",
+        "LA"
+      ],
+      "family": "Half peles",
+      "beforeD": "D",
+      "canonical": "hpele",
+      "corpusUses": 0
+    },
+    {
+      "name": "hpelf",
+      "graces": [
+        "F",
+        "HG",
+        "F",
+        "E"
+      ],
+      "family": "Half peles",
+      "beforeD": "D",
+      "canonical": "hpelf",
+      "corpusUses": 0
+    },
+    {
+      "name": "hpelhg",
+      "graces": [
+        "HG",
+        "HA",
+        "HG",
+        "F"
+      ],
+      "family": "Half peles",
+      "beforeD": "D",
+      "canonical": "hpelhg",
+      "corpusUses": 0
+    },
+    {
+      "name": "st2la",
+      "graces": [
+        "LG",
+        "LA",
+        "LG"
+      ],
+      "family": "Double strikes",
+      "beforeD": "D",
+      "canonical": "brl",
+      "corpusUses": 2
+    },
+    {
+      "name": "st2b",
+      "graces": [
+        "LG",
+        "B",
+        "LG"
+      ],
+      "family": "Double strikes",
+      "beforeD": "D",
+      "canonical": "grpb",
+      "corpusUses": 9
+    },
+    {
+      "name": "st2c",
+      "graces": [
+        "LG",
+        "C",
+        "LG"
+      ],
+      "family": "Double strikes",
+      "beforeD": "D",
+      "canonical": "st2c",
+      "corpusUses": 0
+    },
+    {
+      "name": "st2d",
+      "graces": [
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Double strikes",
+      "beforeD": "D",
+      "canonical": "grp",
+      "corpusUses": 0
+    },
+    {
+      "name": "lst2d",
+      "graces": [
+        "C",
+        "D",
+        "C"
+      ],
+      "family": "Double strikes",
+      "beforeD": "D",
+      "canonical": "lst2d",
+      "corpusUses": 0
+    },
+    {
+      "name": "st2e",
+      "graces": [
+        "LA",
+        "E",
+        "LA"
+      ],
+      "family": "Double strikes",
+      "beforeD": "D",
+      "canonical": "st2e",
+      "corpusUses": 0
+    },
+    {
+      "name": "st2f",
+      "graces": [
+        "E",
+        "F",
+        "E"
+      ],
+      "family": "Double strikes",
+      "beforeD": "D",
+      "canonical": "st2f",
+      "corpusUses": 1
+    },
+    {
+      "name": "st2hg",
+      "graces": [
+        "F",
+        "HG",
+        "F"
+      ],
+      "family": "Double strikes",
+      "beforeD": "D",
+      "canonical": "st2hg",
+      "corpusUses": 0
+    },
+    {
+      "name": "st2ha",
+      "graces": [
+        "HG",
+        "HA",
+        "HG"
+      ],
+      "family": "Double strikes",
+      "beforeD": "D",
+      "canonical": "st2ha",
+      "corpusUses": 1
+    },
+    {
+      "name": "gst2la",
+      "graces": [
+        "HG",
+        "LA",
+        "LG",
+        "LA",
+        "LG"
+      ],
+      "family": "G-gracenote double strikes",
+      "beforeD": "DS",
+      "canonical": "gbr",
+      "corpusUses": 15
+    },
+    {
+      "name": "gst2b",
+      "graces": [
+        "HG",
+        "B",
+        "LG",
+        "B",
+        "LG"
+      ],
+      "family": "G-gracenote double strikes",
+      "beforeD": "DS",
+      "canonical": "gst2b",
+      "corpusUses": 0
+    },
+    {
+      "name": "gst2c",
+      "graces": [
+        "HG",
+        "C",
+        "LG",
+        "C",
+        "LG"
+      ],
+      "family": "G-gracenote double strikes",
+      "beforeD": "DS",
+      "canonical": "gst2c",
+      "corpusUses": 0
+    },
+    {
+      "name": "gst2d",
+      "graces": [
+        "HG",
+        "D",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "G-gracenote double strikes",
+      "beforeD": "DS",
+      "canonical": "ggrpd",
+      "corpusUses": 0
+    },
+    {
+      "name": "lgst2d",
+      "graces": [
+        "HG",
+        "D",
+        "C",
+        "D",
+        "C"
+      ],
+      "family": "G-gracenote double strikes",
+      "beforeD": "D",
+      "canonical": "lgst2d",
+      "corpusUses": 0
+    },
+    {
+      "name": "gst2e",
+      "graces": [
+        "HG",
+        "E",
+        "LA",
+        "E",
+        "LA"
+      ],
+      "family": "G-gracenote double strikes",
+      "beforeD": "D",
+      "canonical": "gst2e",
+      "corpusUses": 0
+    },
+    {
+      "name": "gst2f",
+      "graces": [
+        "HG",
+        "F",
+        "E",
+        "F",
+        "E"
+      ],
+      "family": "G-gracenote double strikes",
+      "beforeD": "D",
+      "canonical": "gst2f",
+      "corpusUses": 0
+    },
+    {
+      "name": "tst2la",
+      "graces": [
+        "HA",
+        "LA",
+        "LG",
+        "LA",
+        "LG"
+      ],
+      "family": "Thumb double strikes",
+      "beforeD": "D",
+      "canonical": "tbr",
+      "corpusUses": 24
+    },
+    {
+      "name": "tst2b",
+      "graces": [
+        "HA",
+        "B",
+        "LG",
+        "B",
+        "LG"
+      ],
+      "family": "Thumb double strikes",
+      "beforeD": "D",
+      "canonical": "tst2b",
+      "corpusUses": 0
+    },
+    {
+      "name": "tst2c",
+      "graces": [
+        "HA",
+        "C",
+        "LG",
+        "C",
+        "LG"
+      ],
+      "family": "Thumb double strikes",
+      "beforeD": "D",
+      "canonical": "tst2c",
+      "corpusUses": 0
+    },
+    {
+      "name": "tst2d",
+      "graces": [
+        "HA",
+        "D",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Thumb double strikes",
+      "beforeD": "D",
+      "canonical": "tgrpd",
+      "corpusUses": 0
+    },
+    {
+      "name": "ltst2d",
+      "graces": [
+        "HA",
+        "D",
+        "C",
+        "D",
+        "C"
+      ],
+      "family": "Thumb double strikes",
+      "beforeD": "D",
+      "canonical": "ltst2d",
+      "corpusUses": 0
+    },
+    {
+      "name": "tst2e",
+      "graces": [
+        "HA",
+        "E",
+        "LA",
+        "E",
+        "LA"
+      ],
+      "family": "Thumb double strikes",
+      "beforeD": "D",
+      "canonical": "tst2e",
+      "corpusUses": 0
+    },
+    {
+      "name": "tst2f",
+      "graces": [
+        "HA",
+        "F",
+        "E",
+        "F",
+        "E"
+      ],
+      "family": "Thumb double strikes",
+      "beforeD": "D",
+      "canonical": "tst2f",
+      "corpusUses": 0
+    },
+    {
+      "name": "tst2hg",
+      "graces": [
+        "HA",
+        "HG",
+        "F",
+        "HG",
+        "F"
+      ],
+      "family": "Thumb double strikes",
+      "beforeD": "D",
+      "canonical": "tst2hg",
+      "corpusUses": 0
+    },
+    {
+      "name": "hst2la",
+      "graces": [
+        "LA",
+        "LG",
+        "LA",
+        "LG"
+      ],
+      "family": "Half double strikes",
+      "beforeD": "D",
+      "canonical": "abr",
+      "corpusUses": 1
+    },
+    {
+      "name": "hst2b",
+      "graces": [
+        "B",
+        "LG",
+        "B",
+        "LG"
+      ],
+      "family": "Half double strikes",
+      "beforeD": "D",
+      "canonical": "hst2b",
+      "corpusUses": 0
+    },
+    {
+      "name": "hst2c",
+      "graces": [
+        "C",
+        "LG",
+        "C",
+        "LG"
+      ],
+      "family": "Half double strikes",
+      "beforeD": "D",
+      "canonical": "hst2c",
+      "corpusUses": 0
+    },
+    {
+      "name": "hst2d",
+      "graces": [
+        "D",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Half double strikes",
+      "beforeD": "D",
+      "canonical": "hgrpd",
+      "corpusUses": 0
+    },
+    {
+      "name": "lhst2d",
+      "graces": [
+        "D",
+        "C",
+        "D",
+        "C"
+      ],
+      "family": "Half double strikes",
+      "beforeD": "D",
+      "canonical": "lhst2d",
+      "corpusUses": 0
+    },
+    {
+      "name": "hst2e",
+      "graces": [
+        "E",
+        "LA",
+        "E",
+        "LA"
+      ],
+      "family": "Half double strikes",
+      "beforeD": "D",
+      "canonical": "hst2e",
+      "corpusUses": 3
+    },
+    {
+      "name": "hst2f",
+      "graces": [
+        "F",
+        "E",
+        "F",
+        "E"
+      ],
+      "family": "Half double strikes",
+      "beforeD": "D",
+      "canonical": "hst2f",
+      "corpusUses": 1
+    },
+    {
+      "name": "hst2hg",
+      "graces": [
+        "HG",
+        "F",
+        "HG",
+        "F"
+      ],
+      "family": "Half double strikes",
+      "beforeD": "D",
+      "canonical": "hst2hg",
+      "corpusUses": 0
+    },
+    {
+      "name": "hst2ha",
+      "graces": [
+        "HA",
+        "HG",
+        "HA",
+        "HG"
+      ],
+      "family": "Half double strikes",
+      "beforeD": "D",
+      "canonical": "hst2ha",
+      "corpusUses": 2
+    },
+    {
+      "name": "st3la",
+      "graces": [
+        "LG",
+        "LA",
+        "LG",
+        "LA",
+        "LG"
+      ],
+      "family": "Triple strikes",
+      "beforeD": "D",
+      "canonical": "st3la",
+      "corpusUses": 0
+    },
+    {
+      "name": "st3b",
+      "graces": [
+        "LG",
+        "B",
+        "LG",
+        "B",
+        "LG"
+      ],
+      "family": "Triple strikes",
+      "beforeD": "D",
+      "canonical": "st3b",
+      "corpusUses": 0
+    },
+    {
+      "name": "st3c",
+      "graces": [
+        "LG",
+        "C",
+        "LG",
+        "C",
+        "LG"
+      ],
+      "family": "Triple strikes",
+      "beforeD": "D",
+      "canonical": "st3c",
+      "corpusUses": 0
+    },
+    {
+      "name": "st3d",
+      "graces": [
+        "LG",
+        "D",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Triple strikes",
+      "beforeD": "D",
+      "canonical": "st3d",
+      "corpusUses": 0
+    },
+    {
+      "name": "lst3d",
+      "graces": [
+        "C",
+        "D",
+        "C",
+        "D",
+        "C"
+      ],
+      "family": "Triple strikes",
+      "beforeD": "D",
+      "canonical": "lst3d",
+      "corpusUses": 0
+    },
+    {
+      "name": "st3e",
+      "graces": [
+        "LA",
+        "E",
+        "LA",
+        "E",
+        "LA"
+      ],
+      "family": "Triple strikes",
+      "beforeD": "D",
+      "canonical": "st3e",
+      "corpusUses": 1
+    },
+    {
+      "name": "st3f",
+      "graces": [
+        "E",
+        "F",
+        "E",
+        "F",
+        "E"
+      ],
+      "family": "Triple strikes",
+      "beforeD": "D",
+      "canonical": "st3f",
+      "corpusUses": 2
+    },
+    {
+      "name": "st3hg",
+      "graces": [
+        "F",
+        "HG",
+        "F",
+        "HG",
+        "F"
+      ],
+      "family": "Triple strikes",
+      "beforeD": "D",
+      "canonical": "st3hg",
+      "corpusUses": 0
+    },
+    {
+      "name": "st3ha",
+      "graces": [
+        "HG",
+        "HA",
+        "HG",
+        "HA",
+        "HG"
+      ],
+      "family": "Triple strikes",
+      "beforeD": "D",
+      "canonical": "st3ha",
+      "corpusUses": 1
+    },
+    {
+      "name": "gst3la",
+      "graces": [
+        "HG",
+        "LA",
+        "LG",
+        "LA",
+        "LG",
+        "LA",
+        "LG"
+      ],
+      "family": "G-gracenote triple strikes",
+      "beforeD": "DS",
+      "canonical": "gst3la",
+      "corpusUses": 0
+    },
+    {
+      "name": "gst3b",
+      "graces": [
+        "HG",
+        "B",
+        "LG",
+        "B",
+        "LG",
+        "B",
+        "LG"
+      ],
+      "family": "G-gracenote triple strikes",
+      "beforeD": "DS",
+      "canonical": "gst3b",
+      "corpusUses": 0
+    },
+    {
+      "name": "gst3c",
+      "graces": [
+        "HG",
+        "C",
+        "LG",
+        "C",
+        "LG",
+        "C",
+        "LG"
+      ],
+      "family": "G-gracenote triple strikes",
+      "beforeD": "DS",
+      "canonical": "gst3c",
+      "corpusUses": 0
+    },
+    {
+      "name": "gst3d",
+      "graces": [
+        "HG",
+        "D",
+        "LG",
+        "D",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "G-gracenote triple strikes",
+      "beforeD": "DS",
+      "canonical": "gst3d",
+      "corpusUses": 0
+    },
+    {
+      "name": "lgst3d",
+      "graces": [
+        "HG",
+        "D",
+        "C",
+        "D",
+        "C",
+        "D",
+        "C"
+      ],
+      "family": "G-gracenote triple strikes",
+      "beforeD": "D",
+      "canonical": "lgst3d",
+      "corpusUses": 0
+    },
+    {
+      "name": "gst3e",
+      "graces": [
+        "HG",
+        "E",
+        "LA",
+        "E",
+        "LA",
+        "E",
+        "LA"
+      ],
+      "family": "G-gracenote triple strikes",
+      "beforeD": "D",
+      "canonical": "gst3e",
+      "corpusUses": 0
+    },
+    {
+      "name": "gst3f",
+      "graces": [
+        "HG",
+        "F",
+        "E",
+        "F",
+        "E",
+        "F",
+        "E"
+      ],
+      "family": "G-gracenote triple strikes",
+      "beforeD": "D",
+      "canonical": "gst3f",
+      "corpusUses": 0
+    },
+    {
+      "name": "tst3la",
+      "graces": [
+        "HA",
+        "LA",
+        "LG",
+        "LA",
+        "LG",
+        "LA",
+        "LG"
+      ],
+      "family": "Thumb triple strikes",
+      "beforeD": "D",
+      "canonical": "tst3la",
+      "corpusUses": 0
+    },
+    {
+      "name": "tst3b",
+      "graces": [
+        "HA",
+        "B",
+        "LG",
+        "B",
+        "LG",
+        "B",
+        "LG"
+      ],
+      "family": "Thumb triple strikes",
+      "beforeD": "D",
+      "canonical": "tst3b",
+      "corpusUses": 0
+    },
+    {
+      "name": "tst3c",
+      "graces": [
+        "HA",
+        "C",
+        "LG",
+        "C",
+        "LG",
+        "C",
+        "LG"
+      ],
+      "family": "Thumb triple strikes",
+      "beforeD": "D",
+      "canonical": "tst3c",
+      "corpusUses": 0
+    },
+    {
+      "name": "tst3d",
+      "graces": [
+        "HA",
+        "D",
+        "LG",
+        "D",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Thumb triple strikes",
+      "beforeD": "D",
+      "canonical": "tst3d",
+      "corpusUses": 0
+    },
+    {
+      "name": "ltst3d",
+      "graces": [
+        "HA",
+        "D",
+        "C",
+        "D",
+        "C",
+        "D",
+        "C"
+      ],
+      "family": "Thumb triple strikes",
+      "beforeD": "D",
+      "canonical": "ltst3d",
+      "corpusUses": 0
+    },
+    {
+      "name": "tst3e",
+      "graces": [
+        "HA",
+        "E",
+        "LA",
+        "E",
+        "LA",
+        "E",
+        "LA"
+      ],
+      "family": "Thumb triple strikes",
+      "beforeD": "D",
+      "canonical": "tst3e",
+      "corpusUses": 0
+    },
+    {
+      "name": "tst3f",
+      "graces": [
+        "HA",
+        "F",
+        "E",
+        "F",
+        "E",
+        "F",
+        "E"
+      ],
+      "family": "Thumb triple strikes",
+      "beforeD": "D",
+      "canonical": "tst3f",
+      "corpusUses": 0
+    },
+    {
+      "name": "tst3hg",
+      "graces": [
+        "HA",
+        "HG",
+        "F",
+        "HG",
+        "F",
+        "HG",
+        "F"
+      ],
+      "family": "Thumb triple strikes",
+      "beforeD": "D",
+      "canonical": "tst3hg",
+      "corpusUses": 0
+    },
+    {
+      "name": "hst3la",
+      "graces": [
+        "LA",
+        "LG",
+        "LA",
+        "LG",
+        "LA",
+        "LG"
+      ],
+      "family": "Half triple strikes",
+      "beforeD": "D",
+      "canonical": "hst3la",
+      "corpusUses": 0
+    },
+    {
+      "name": "hst3b",
+      "graces": [
+        "B",
+        "LG",
+        "B",
+        "LG",
+        "B",
+        "LG"
+      ],
+      "family": "Half triple strikes",
+      "beforeD": "D",
+      "canonical": "hst3b",
+      "corpusUses": 0
+    },
+    {
+      "name": "hst3c",
+      "graces": [
+        "C",
+        "LG",
+        "C",
+        "LG",
+        "C",
+        "LG"
+      ],
+      "family": "Half triple strikes",
+      "beforeD": "D",
+      "canonical": "hst3c",
+      "corpusUses": 0
+    },
+    {
+      "name": "hst3d",
+      "graces": [
+        "D",
+        "LG",
+        "D",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Half triple strikes",
+      "beforeD": "D",
+      "canonical": "hst3d",
+      "corpusUses": 0
+    },
+    {
+      "name": "lhst3d",
+      "graces": [
+        "D",
+        "C",
+        "D",
+        "C",
+        "D",
+        "C"
+      ],
+      "family": "Half triple strikes",
+      "beforeD": "D",
+      "canonical": "lhst3d",
+      "corpusUses": 0
+    },
+    {
+      "name": "hst3e",
+      "graces": [
+        "E",
+        "LA",
+        "E",
+        "LA",
+        "E",
+        "LA"
+      ],
+      "family": "Half triple strikes",
+      "beforeD": "D",
+      "canonical": "hst3e",
+      "corpusUses": 0
+    },
+    {
+      "name": "hst3f",
+      "graces": [
+        "F",
+        "E",
+        "F",
+        "E",
+        "F",
+        "E"
+      ],
+      "family": "Half triple strikes",
+      "beforeD": "D",
+      "canonical": "hst3f",
+      "corpusUses": 0
+    },
+    {
+      "name": "hst3hg",
+      "graces": [
+        "HG",
+        "F",
+        "HG",
+        "F",
+        "HG",
+        "F"
+      ],
+      "family": "Half triple strikes",
+      "beforeD": "D",
+      "canonical": "hst3hg",
+      "corpusUses": 0
+    },
+    {
+      "name": "hst3ha",
+      "graces": [
+        "HA",
+        "HG",
+        "HA",
+        "HG",
+        "HA",
+        "HG"
+      ],
+      "family": "Half triple strikes",
+      "beforeD": "D",
+      "canonical": "hst3ha",
+      "corpusUses": 7
+    },
+    {
+      "name": "dlg",
+      "graces": [
+        "D",
+        "LG"
+      ],
+      "family": "Two gracenotes (D, E or F first)",
+      "beforeD": "D",
+      "canonical": "hstd",
+      "corpusUses": 0
+    },
+    {
+      "name": "dla",
+      "graces": [
+        "D",
+        "LA"
+      ],
+      "family": "Two gracenotes (D, E or F first)",
+      "beforeD": "D",
+      "canonical": "dla",
+      "corpusUses": 0
+    },
+    {
+      "name": "db",
+      "graces": [
+        "D",
+        "B"
+      ],
+      "family": "Two gracenotes (D, E or F first)",
+      "beforeD": "D",
+      "canonical": "db",
+      "corpusUses": 2
+    },
+    {
+      "name": "dc",
+      "graces": [
+        "D",
+        "C"
+      ],
+      "family": "Two gracenotes (D, E or F first)",
+      "beforeD": "D",
+      "canonical": "lhstd",
+      "corpusUses": 85
+    },
+    {
+      "name": "elg",
+      "graces": [
+        "E",
+        "LG"
+      ],
+      "family": "Two gracenotes (D, E or F first)",
+      "beforeD": "D",
+      "canonical": "elg",
+      "corpusUses": 0
+    },
+    {
+      "name": "ela",
+      "graces": [
+        "E",
+        "LA"
+      ],
+      "family": "Two gracenotes (D, E or F first)",
+      "beforeD": "D",
+      "canonical": "hste",
+      "corpusUses": 3
+    },
+    {
+      "name": "eb",
+      "graces": [
+        "E",
+        "B"
+      ],
+      "family": "Two gracenotes (D, E or F first)",
+      "beforeD": "D",
+      "canonical": "eb",
+      "corpusUses": 0
+    },
+    {
+      "name": "ec",
+      "graces": [
+        "E",
+        "C"
+      ],
+      "family": "Two gracenotes (D, E or F first)",
+      "beforeD": "D",
+      "canonical": "ec",
+      "corpusUses": 0
+    },
+    {
+      "name": "ed",
+      "graces": [
+        "E",
+        "D"
+      ],
+      "family": "Two gracenotes (D, E or F first)",
+      "beforeD": "D",
+      "canonical": "ed",
+      "corpusUses": 0
+    },
+    {
+      "name": "flg",
+      "graces": [
+        "F",
+        "LG"
+      ],
+      "family": "Two gracenotes (D, E or F first)",
+      "beforeD": "D",
+      "canonical": "flg",
+      "corpusUses": 0
+    },
+    {
+      "name": "fla",
+      "graces": [
+        "F",
+        "LA"
+      ],
+      "family": "Two gracenotes (D, E or F first)",
+      "beforeD": "D",
+      "canonical": "fla",
+      "corpusUses": 0
+    },
+    {
+      "name": "fb",
+      "graces": [
+        "F",
+        "B"
+      ],
+      "family": "Two gracenotes (D, E or F first)",
+      "beforeD": "D",
+      "canonical": "fb",
+      "corpusUses": 0
+    },
+    {
+      "name": "fc",
+      "graces": [
+        "F",
+        "C"
+      ],
+      "family": "Two gracenotes (D, E or F first)",
+      "beforeD": "D",
+      "canonical": "fc",
+      "corpusUses": 0
+    },
+    {
+      "name": "fd",
+      "graces": [
+        "F",
+        "D"
+      ],
+      "family": "Two gracenotes (D, E or F first)",
+      "beforeD": "D",
+      "canonical": "fd",
+      "corpusUses": 0
+    },
+    {
+      "name": "fe",
+      "graces": [
+        "F",
+        "E"
+      ],
+      "family": "Two gracenotes (D, E or F first)",
+      "beforeD": "D",
+      "canonical": "hstf",
+      "corpusUses": 10
+    },
+    {
+      "name": "glg",
+      "graces": [
+        "HG",
+        "LG"
+      ],
+      "family": "Two gracenotes (High G or High A first)",
+      "beforeD": "DS",
+      "canonical": "glg",
+      "corpusUses": 0
+    },
+    {
+      "name": "gla",
+      "graces": [
+        "HG",
+        "LA"
+      ],
+      "family": "Two gracenotes (High G or High A first)",
+      "beforeD": "D",
+      "canonical": "gla",
+      "corpusUses": 5
+    },
+    {
+      "name": "gb",
+      "graces": [
+        "HG",
+        "B"
+      ],
+      "family": "Two gracenotes (High G or High A first)",
+      "beforeD": "D",
+      "canonical": "gb",
+      "corpusUses": 18
+    },
+    {
+      "name": "gc",
+      "graces": [
+        "HG",
+        "C"
+      ],
+      "family": "Two gracenotes (High G or High A first)",
+      "beforeD": "D",
+      "canonical": "gc",
+      "corpusUses": 16
+    },
+    {
+      "name": "gd",
+      "graces": [
+        "HG",
+        "D"
+      ],
+      "family": "Two gracenotes (High G or High A first)",
+      "beforeD": "D",
+      "canonical": "gd",
+      "corpusUses": 6
+    },
+    {
+      "name": "ge",
+      "graces": [
+        "HG",
+        "E"
+      ],
+      "family": "Two gracenotes (High G or High A first)",
+      "beforeD": "D",
+      "canonical": "ge",
+      "corpusUses": 17
+    },
+    {
+      "name": "gf",
+      "graces": [
+        "HG",
+        "F"
+      ],
+      "family": "Two gracenotes (High G or High A first)",
+      "beforeD": "D",
+      "canonical": "dbhg",
+      "corpusUses": 50
+    },
+    {
+      "name": "tlg",
+      "graces": [
+        "HA",
+        "LG"
+      ],
+      "family": "Two gracenotes (High G or High A first)",
+      "beforeD": "D",
+      "canonical": "tlg",
+      "corpusUses": 0
+    },
+    {
+      "name": "tla",
+      "graces": [
+        "HA",
+        "LA"
+      ],
+      "family": "Two gracenotes (High G or High A first)",
+      "beforeD": "D",
+      "canonical": "tla",
+      "corpusUses": 0
+    },
+    {
+      "name": "tb",
+      "graces": [
+        "HA",
+        "B"
+      ],
+      "family": "Two gracenotes (High G or High A first)",
+      "beforeD": "D",
+      "canonical": "tb",
+      "corpusUses": 0
+    },
+    {
+      "name": "tc",
+      "graces": [
+        "HA",
+        "C"
+      ],
+      "family": "Two gracenotes (High G or High A first)",
+      "beforeD": "D",
+      "canonical": "tc",
+      "corpusUses": 0
+    },
+    {
+      "name": "td",
+      "graces": [
+        "HA",
+        "D"
+      ],
+      "family": "Two gracenotes (High G or High A first)",
+      "beforeD": "D",
+      "canonical": "td",
+      "corpusUses": 3
+    },
+    {
+      "name": "te",
+      "graces": [
+        "HA",
+        "E"
+      ],
+      "family": "Two gracenotes (High G or High A first)",
+      "beforeD": "D",
+      "canonical": "te",
+      "corpusUses": 4
+    },
+    {
+      "name": "tf",
+      "graces": [
+        "HA",
+        "F"
+      ],
+      "family": "Two gracenotes (High G or High A first)",
+      "beforeD": "D",
+      "canonical": "tf",
+      "corpusUses": 0
+    },
+    {
+      "name": "thg",
+      "graces": [
+        "HA",
+        "HG"
+      ],
+      "family": "Two gracenotes (High G or High A first)",
+      "beforeD": "D",
+      "canonical": "dbha",
+      "corpusUses": 41
+    },
+    {
+      "name": "adeda",
+      "graces": [
+        "D",
+        "LG",
+        "E",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "adeda",
+      "corpusUses": 0
+    },
+    {
+      "name": "chechere",
+      "graces": [
+        "HG",
+        "E",
+        "HA",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "chechere",
+      "corpusUses": 0
+    },
+    {
+      "name": "chedare",
+      "graces": [
+        "F",
+        "E",
+        "HG",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "chedare",
+      "corpusUses": 53
+    },
+    {
+      "name": "chedari",
+      "graces": [
+        "F",
+        "E",
+        "HG",
+        "E",
+        "F",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "chedari",
+      "corpusUses": 8
+    },
+    {
+      "name": "chelalho",
+      "graces": [
+        "F",
+        "D",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "chelalho",
+      "corpusUses": 0
+    },
+    {
+      "name": "crunl",
+      "graces": [
+        "LG",
+        "D",
+        "LG",
+        "E",
+        "LA",
+        "F",
+        "LA"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "crunl",
+      "corpusUses": 241
+    },
+    {
+      "name": "crunlb",
+      "graces": [
+        "LG",
+        "B",
+        "LG",
+        "E",
+        "LA",
+        "F",
+        "LA"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "crunlb",
+      "corpusUses": 3
+    },
+    {
+      "name": "crunlbbrea",
+      "graces": [
+        "LG",
+        "B",
+        "LG",
+        "E",
+        "LA",
+        "F",
+        "LA"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "crunlb",
+      "corpusUses": 0
+    },
+    {
+      "name": "crunlblg",
+      "graces": [
+        "LG",
+        "B",
+        "LG",
+        "E",
+        "LG",
+        "F",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "crunlblg",
+      "corpusUses": 0
+    },
+    {
+      "name": "crunlbrea",
+      "graces": [
+        "LG",
+        "D",
+        "LG",
+        "E",
+        "LA",
+        "F",
+        "LA"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "crunl",
+      "corpusUses": 0
+    },
+    {
+      "name": "crunllg",
+      "graces": [
+        "LG",
+        "D",
+        "LG",
+        "E",
+        "LG",
+        "F",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "crunllg",
+      "corpusUses": 0
+    },
+    {
+      "name": "dare",
+      "graces": [
+        "F",
+        "E",
+        "HG",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "chedare",
+      "corpusUses": 95
+    },
+    {
+      "name": "darodo",
+      "graces": [
+        "LG",
+        "D",
+        "LG",
+        "C",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "bubly",
+      "corpusUses": 39
+    },
+    {
+      "name": "darodo16",
+      "graces": [
+        "LG",
+        "D",
+        "LG",
+        "C",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "bubly",
+      "corpusUses": 3
+    },
+    {
+      "name": "dbstf",
+      "graces": [
+        "F",
+        "HG",
+        "F"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "st2hg",
+      "corpusUses": 2
+    },
+    {
+      "name": "dbsthg",
+      "graces": [
+        "HG",
+        "HA",
+        "HG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "st2ha",
+      "corpusUses": 3
+    },
+    {
+      "name": "deda",
+      "graces": [
+        "LG",
+        "E",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "deda",
+      "corpusUses": 1
+    },
+    {
+      "name": "dili",
+      "graces": [
+        "HA",
+        "HG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "dbha",
+      "corpusUses": 23
+    },
+    {
+      "name": "dre",
+      "graces": [
+        "LA",
+        "F",
+        "LA"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "dre",
+      "corpusUses": 0
+    },
+    {
+      "name": "edre",
+      "graces": [
+        "E",
+        "LA",
+        "F",
+        "LA"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "edre",
+      "corpusUses": 282
+    },
+    {
+      "name": "edreb",
+      "graces": [
+        "E",
+        "B",
+        "F",
+        "B"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "edreb",
+      "corpusUses": 25
+    },
+    {
+      "name": "edrec",
+      "graces": [
+        "E",
+        "C",
+        "F",
+        "C"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "edrec",
+      "corpusUses": 17
+    },
+    {
+      "name": "edred",
+      "graces": [
+        "E",
+        "D",
+        "F",
+        "D"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "edred",
+      "corpusUses": 7
+    },
+    {
+      "name": "edrela",
+      "graces": [
+        "E",
+        "LA",
+        "F",
+        "LA"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "edre",
+      "corpusUses": 2
+    },
+    {
+      "name": "edrelg",
+      "graces": [
+        "E",
+        "LG",
+        "F",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "edrelg",
+      "corpusUses": 0
+    },
+    {
+      "name": "embari",
+      "graces": [
+        "E",
+        "LG",
+        "F",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "edrelg",
+      "corpusUses": 21
+    },
+    {
+      "name": "enbain",
+      "graces": [
+        "LA",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "hgrpla",
+      "corpusUses": 0
+    },
+    {
+      "name": "endari",
+      "graces": [
+        "E",
+        "LA",
+        "F",
+        "LA"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "edre",
+      "corpusUses": 31
+    },
+    {
+      "name": "endarig",
+      "graces": [
+        "F",
+        "E",
+        "HG",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "chedare",
+      "corpusUses": 0
+    },
+    {
+      "name": "gadeda",
+      "graces": [
+        "HG",
+        "D",
+        "LG",
+        "E",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "DS",
+      "canonical": "gadeda",
+      "corpusUses": 0
+    },
+    {
+      "name": "gdare",
+      "graces": [
+        "HG",
+        "F",
+        "E",
+        "HG",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "gdare",
+      "corpusUses": 0
+    },
+    {
+      "name": "gedre",
+      "graces": [
+        "HG",
+        "E",
+        "LA",
+        "F",
+        "LA"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "gedre",
+      "corpusUses": 0
+    },
+    {
+      "name": "genbain",
+      "graces": [
+        "HG",
+        "LA",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "DS",
+      "canonical": "ggrpla",
+      "corpusUses": 0
+    },
+    {
+      "name": "gendari",
+      "graces": [
+        "HG",
+        "E",
+        "F",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "gendari",
+      "corpusUses": 0
+    },
+    {
+      "name": "godro",
+      "graces": [
+        "HG",
+        "C",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "DS",
+      "canonical": "ggrpc",
+      "corpusUses": 3
+    },
+    {
+      "name": "gotro",
+      "graces": [
+        "HG",
+        "B",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "DS",
+      "canonical": "ggrpb",
+      "corpusUses": 1
+    },
+    {
+      "name": "hchechere",
+      "graces": [
+        "E",
+        "HA",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "hchechere",
+      "corpusUses": 0
+    },
+    {
+      "name": "hcrunl",
+      "graces": [
+        "D",
+        "LG",
+        "E",
+        "LA",
+        "F",
+        "LA"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "hcrunl",
+      "corpusUses": 0
+    },
+    {
+      "name": "hcrunlla",
+      "graces": [
+        "D",
+        "LA",
+        "E",
+        "LA",
+        "F",
+        "LA"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "hcrunlla",
+      "corpusUses": 4
+    },
+    {
+      "name": "hcrunllabrea",
+      "graces": [
+        "D",
+        "LA",
+        "E",
+        "LA",
+        "F",
+        "LA"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "hcrunlla",
+      "corpusUses": 0
+    },
+    {
+      "name": "hcrunllg",
+      "graces": [
+        "D",
+        "LG",
+        "E",
+        "LG",
+        "F",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "hcrunllg",
+      "corpusUses": 0
+    },
+    {
+      "name": "hcrunllgla",
+      "graces": [
+        "D",
+        "LG",
+        "E",
+        "LA",
+        "F",
+        "LA"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "hcrunl",
+      "corpusUses": 0
+    },
+    {
+      "name": "hdarodo",
+      "graces": [
+        "D",
+        "LG",
+        "C",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "hbubly",
+      "corpusUses": 4
+    },
+    {
+      "name": "hedale",
+      "graces": [
+        "E",
+        "HG",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "hedale",
+      "corpusUses": 0
+    },
+    {
+      "name": "hedari",
+      "graces": [
+        "E",
+        "HG",
+        "E",
+        "F",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "hedari",
+      "corpusUses": 0
+    },
+    {
+      "name": "hiharin",
+      "graces": [
+        "D",
+        "LA",
+        "LG",
+        "LA",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "hiharin",
+      "corpusUses": 69
+    },
+    {
+      "name": "hlemla",
+      "graces": [
+        "D",
+        "LA"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "dla",
+      "corpusUses": 0
+    },
+    {
+      "name": "hlemlabrea",
+      "graces": [
+        "D",
+        "LA"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "dla",
+      "corpusUses": 0
+    },
+    {
+      "name": "hlemlg",
+      "graces": [
+        "D",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "hstd",
+      "corpusUses": 0
+    },
+    {
+      "name": "htarla",
+      "graces": [
+        "D",
+        "LA",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "htarla",
+      "corpusUses": 20
+    },
+    {
+      "name": "htarlabrea",
+      "graces": [
+        "D",
+        "LA",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "htarla",
+      "corpusUses": 0
+    },
+    {
+      "name": "htarlg",
+      "graces": [
+        "D",
+        "LG",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "htar",
+      "corpusUses": 9
+    },
+    {
+      "name": "htra",
+      "graces": [
+        "D",
+        "C"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "lhstd",
+      "corpusUses": 0
+    },
+    {
+      "name": "lem",
+      "graces": [
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "grp",
+      "corpusUses": 2
+    },
+    {
+      "name": "lemb",
+      "graces": [
+        "LG",
+        "B",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "grpb",
+      "corpusUses": 0
+    },
+    {
+      "name": "lembbrea",
+      "graces": [
+        "LG",
+        "B",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "grpb",
+      "corpusUses": 0
+    },
+    {
+      "name": "lembrea",
+      "graces": [
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "grp",
+      "corpusUses": 0
+    },
+    {
+      "name": "odro",
+      "graces": [
+        "C",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "hgrpc",
+      "corpusUses": 17
+    },
+    {
+      "name": "otro",
+      "graces": [
+        "B",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "hgrpb",
+      "corpusUses": 16
+    },
+    {
+      "name": "rodin",
+      "graces": [
+        "LG",
+        "B",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "grpb",
+      "corpusUses": 59
+    },
+    {
+      "name": "tadeda",
+      "graces": [
+        "HA",
+        "D",
+        "LG",
+        "E",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "tadeda",
+      "corpusUses": 0
+    },
+    {
+      "name": "tarbbrea",
+      "graces": [
+        "LG",
+        "B",
+        "LG",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "tarb",
+      "corpusUses": 0
+    },
+    {
+      "name": "tarblg",
+      "graces": [
+        "LG",
+        "B",
+        "LG",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "tarb",
+      "corpusUses": 0
+    },
+    {
+      "name": "tarbrea",
+      "graces": [
+        "LG",
+        "D",
+        "LG",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "tar",
+      "corpusUses": 8
+    },
+    {
+      "name": "tarlg",
+      "graces": [
+        "LG",
+        "D",
+        "LG",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "tar",
+      "corpusUses": 0
+    },
+    {
+      "name": "tchechere",
+      "graces": [
+        "HA",
+        "HG",
+        "E",
+        "HA",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "tchechere",
+      "corpusUses": 0
+    },
+    {
+      "name": "tdare",
+      "graces": [
+        "HA",
+        "F",
+        "E",
+        "HG",
+        "E"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "tdare",
+      "corpusUses": 0
+    },
+    {
+      "name": "tedre",
+      "graces": [
+        "HA",
+        "E",
+        "LA",
+        "F",
+        "LA"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "tedre",
+      "corpusUses": 0
+    },
+    {
+      "name": "tenbain",
+      "graces": [
+        "HA",
+        "LA",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "tgrpla",
+      "corpusUses": 0
+    },
+    {
+      "name": "todro",
+      "graces": [
+        "HA",
+        "C",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "tgrpc",
+      "corpusUses": 0
+    },
+    {
+      "name": "totro",
+      "graces": [
+        "HA",
+        "B",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "D",
+      "canonical": "tgrpb",
+      "corpusUses": 0
+    },
+    {
+      "name": "tra",
+      "graces": [
+        "LG",
+        "D",
+        "C"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "DT",
+      "canonical": "thrd",
+      "corpusUses": 97
+    },
+    {
+      "name": "tra8",
+      "graces": [
+        "LG",
+        "D",
+        "C"
+      ],
+      "family": "Piobaireachd movements",
+      "beforeD": "DT",
+      "canonical": "thrd",
+      "corpusUses": 1
+    },
+    {
+      "name": "cadae",
+      "graces": [
+        "HA",
+        "E"
+      ],
+      "family": "Cadences",
+      "beforeD": "D",
+      "canonical": "te",
+      "corpusUses": 14
+    },
+    {
+      "name": "cadaed",
+      "graces": [
+        "HA",
+        "E",
+        "D"
+      ],
+      "family": "Cadences",
+      "beforeD": "D",
+      "canonical": "cadaed",
+      "corpusUses": 12
+    },
+    {
+      "name": "cadaf",
+      "graces": [
+        "HA",
+        "F"
+      ],
+      "family": "Cadences",
+      "beforeD": "D",
+      "canonical": "tf",
+      "corpusUses": 0
+    },
+    {
+      "name": "cade",
+      "graces": [
+        "E"
+      ],
+      "family": "Cadences",
+      "beforeD": "D",
+      "canonical": "eg",
+      "corpusUses": 13
+    },
+    {
+      "name": "caded",
+      "graces": [
+        "E",
+        "D"
+      ],
+      "family": "Cadences",
+      "beforeD": "D",
+      "canonical": "ed",
+      "corpusUses": 2
+    },
+    {
+      "name": "cadge",
+      "graces": [
+        "HG",
+        "E"
+      ],
+      "family": "Cadences",
+      "beforeD": "D",
+      "canonical": "ge",
+      "corpusUses": 197
+    },
+    {
+      "name": "cadged",
+      "graces": [
+        "HG",
+        "E",
+        "D"
+      ],
+      "family": "Cadences",
+      "beforeD": "D",
+      "canonical": "cadged",
+      "corpusUses": 331
+    },
+    {
+      "name": "cadgf",
+      "graces": [
+        "HG",
+        "F"
+      ],
+      "family": "Cadences",
+      "beforeD": "D",
+      "canonical": "dbhg",
+      "corpusUses": 2
+    },
+    {
+      "name": "fcadae",
+      "graces": [
+        "HA",
+        "E"
+      ],
+      "family": "Cadences",
+      "beforeD": "D",
+      "canonical": "te",
+      "corpusUses": 0
+    },
+    {
+      "name": "fcadaed",
+      "graces": [
+        "HA",
+        "E",
+        "D"
+      ],
+      "family": "Cadences",
+      "beforeD": "D",
+      "canonical": "cadaed",
+      "corpusUses": 0
+    },
+    {
+      "name": "fcadaf",
+      "graces": [
+        "HA",
+        "F"
+      ],
+      "family": "Cadences",
+      "beforeD": "D",
+      "canonical": "tf",
+      "corpusUses": 0
+    },
+    {
+      "name": "fcade",
+      "graces": [
+        "E"
+      ],
+      "family": "Cadences",
+      "beforeD": "D",
+      "canonical": "eg",
+      "corpusUses": 0
+    },
+    {
+      "name": "fcaded",
+      "graces": [
+        "E",
+        "D"
+      ],
+      "family": "Cadences",
+      "beforeD": "D",
+      "canonical": "ed",
+      "corpusUses": 0
+    },
+    {
+      "name": "fcadge",
+      "graces": [
+        "HG",
+        "E"
+      ],
+      "family": "Cadences",
+      "beforeD": "D",
+      "canonical": "ge",
+      "corpusUses": 12
+    },
+    {
+      "name": "fcadged",
+      "graces": [
+        "HG",
+        "E",
+        "D"
+      ],
+      "family": "Cadences",
+      "beforeD": "D",
+      "canonical": "cadged",
+      "corpusUses": 16
+    },
+    {
+      "name": "fcadgf",
+      "graces": [
+        "HG",
+        "F"
+      ],
+      "family": "Cadences",
+      "beforeD": "D",
+      "canonical": "dbhg",
+      "corpusUses": 10
+    },
+    {
+      "name": "din",
+      "graces": [
+        "LG"
+      ],
+      "family": "Echo beats",
+      "beforeD": "D",
+      "canonical": "strlg",
+      "corpusUses": 162
+    },
+    {
+      "name": "echob",
+      "graces": [
+        "B"
+      ],
+      "family": "Echo beats",
+      "beforeD": "D",
+      "canonical": "bg",
+      "corpusUses": 2
+    },
+    {
+      "name": "echoc",
+      "graces": [
+        "C"
+      ],
+      "family": "Echo beats",
+      "beforeD": "D",
+      "canonical": "cg",
+      "corpusUses": 1
+    },
+    {
+      "name": "echod",
+      "graces": [
+        "D"
+      ],
+      "family": "Echo beats",
+      "beforeD": "D",
+      "canonical": "dg",
+      "corpusUses": 2
+    },
+    {
+      "name": "echoe",
+      "graces": [
+        "E"
+      ],
+      "family": "Echo beats",
+      "beforeD": "D",
+      "canonical": "eg",
+      "corpusUses": 34
+    },
+    {
+      "name": "echof",
+      "graces": [
+        "F"
+      ],
+      "family": "Echo beats",
+      "beforeD": "D",
+      "canonical": "fg",
+      "corpusUses": 2
+    },
+    {
+      "name": "echoha",
+      "graces": [
+        "HA"
+      ],
+      "family": "Echo beats",
+      "beforeD": "D",
+      "canonical": "tg",
+      "corpusUses": 0
+    },
+    {
+      "name": "echohg",
+      "graces": [
+        "HG"
+      ],
+      "family": "Echo beats",
+      "beforeD": "D",
+      "canonical": "gg",
+      "corpusUses": 105
+    },
+    {
+      "name": "echola",
+      "graces": [
+        "LA"
+      ],
+      "family": "Echo beats",
+      "beforeD": "D",
+      "canonical": "ag",
+      "corpusUses": 112
+    },
+    {
+      "name": "echolg",
+      "graces": [
+        "LG"
+      ],
+      "family": "Echo beats",
+      "beforeD": "D",
+      "canonical": "strlg",
+      "corpusUses": 195
+    },
+    {
+      "name": "padeda",
+      "graces": [
+        "D",
+        "LG",
+        "E",
+        "LG"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "adeda",
+      "corpusUses": 1
+    },
+    {
+      "name": "pchechere",
+      "graces": [
+        "HG",
+        "E",
+        "HA",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "chechere",
+      "corpusUses": 0
+    },
+    {
+      "name": "pchedari",
+      "graces": [
+        "F",
+        "E",
+        "HG",
+        "E",
+        "F",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "chedari",
+      "corpusUses": 7
+    },
+    {
+      "name": "pcmb",
+      "graces": [
+        "HG",
+        "B",
+        "LG",
+        "D",
+        "LG",
+        "B",
+        "E",
+        "B",
+        "F",
+        "B"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "pcmb",
+      "corpusUses": 112
+    },
+    {
+      "name": "pcmc",
+      "graces": [
+        "HG",
+        "C",
+        "LG",
+        "D",
+        "LG",
+        "C",
+        "E",
+        "C",
+        "F",
+        "C"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "pcmc",
+      "corpusUses": 41
+    },
+    {
+      "name": "pcmd",
+      "graces": [
+        "HG",
+        "B",
+        "LG",
+        "D",
+        "C",
+        "D",
+        "E",
+        "D",
+        "F",
+        "D"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "pcmd",
+      "corpusUses": 40
+    },
+    {
+      "name": "pdare",
+      "graces": [
+        "F",
+        "E",
+        "HG",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "chedare",
+      "corpusUses": 30
+    },
+    {
+      "name": "pdarodo",
+      "graces": [
+        "LG",
+        "D",
+        "LG",
+        "C",
+        "LG"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "bubly",
+      "corpusUses": 16
+    },
+    {
+      "name": "pdarodo16",
+      "graces": [
+        "LG",
+        "D",
+        "LG",
+        "C",
+        "LG"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "bubly",
+      "corpusUses": 0
+    },
+    {
+      "name": "pdili",
+      "graces": [
+        "HA",
+        "HG"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "dbha",
+      "corpusUses": 89
+    },
+    {
+      "name": "pedre",
+      "graces": [
+        "E",
+        "LA",
+        "F",
+        "LA"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "edre",
+      "corpusUses": 100
+    },
+    {
+      "name": "pedreb",
+      "graces": [
+        "E",
+        "B",
+        "F",
+        "B"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "edreb",
+      "corpusUses": 0
+    },
+    {
+      "name": "pedrec",
+      "graces": [
+        "E",
+        "C",
+        "F",
+        "C"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "edrec",
+      "corpusUses": 0
+    },
+    {
+      "name": "pedred",
+      "graces": [
+        "E",
+        "D",
+        "F",
+        "D"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "edred",
+      "corpusUses": 0
+    },
+    {
+      "name": "pedrela",
+      "graces": [
+        "E",
+        "LA",
+        "F",
+        "LA"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "edre",
+      "corpusUses": 0
+    },
+    {
+      "name": "pedrelg",
+      "graces": [
+        "E",
+        "LG",
+        "F",
+        "LG"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "edrelg",
+      "corpusUses": 0
+    },
+    {
+      "name": "pembari",
+      "graces": [
+        "E",
+        "LG",
+        "F",
+        "LG"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "edrelg",
+      "corpusUses": 46
+    },
+    {
+      "name": "penbain",
+      "graces": [
+        "LA",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "hgrpla",
+      "corpusUses": 0
+    },
+    {
+      "name": "pendari",
+      "graces": [
+        "E",
+        "LA",
+        "F",
+        "LA"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "edre",
+      "corpusUses": 0
+    },
+    {
+      "name": "pgrp",
+      "graces": [
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "grp",
+      "corpusUses": 96
+    },
+    {
+      "name": "phdarodo",
+      "graces": [
+        "D",
+        "LG",
+        "C",
+        "LG"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "hbubly",
+      "corpusUses": 0
+    },
+    {
+      "name": "phedari",
+      "graces": [
+        "E",
+        "HG",
+        "E",
+        "F",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "hedari",
+      "corpusUses": 0
+    },
+    {
+      "name": "phiharin",
+      "graces": [
+        "D",
+        "LA",
+        "LG",
+        "LA",
+        "LG"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "hiharin",
+      "corpusUses": 46
+    },
+    {
+      "name": "phtra",
+      "graces": [
+        "D",
+        "C"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "lhstd",
+      "corpusUses": 6
+    },
+    {
+      "name": "phtripb",
+      "graces": [
+        "B",
+        "D",
+        "B",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "phtripb",
+      "corpusUses": 0
+    },
+    {
+      "name": "phtripc",
+      "graces": [
+        "C",
+        "D",
+        "C",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "phtripc",
+      "corpusUses": 0
+    },
+    {
+      "name": "phtripla",
+      "graces": [
+        "LA",
+        "D",
+        "LA",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "phtripla",
+      "corpusUses": 0
+    },
+    {
+      "name": "phtriplg",
+      "graces": [
+        "LG",
+        "D",
+        "LG",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "tar",
+      "corpusUses": 0
+    },
+    {
+      "name": "podro",
+      "graces": [
+        "C",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "hgrpc",
+      "corpusUses": 73
+    },
+    {
+      "name": "potro",
+      "graces": [
+        "B",
+        "LG",
+        "D",
+        "LG"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "hgrpb",
+      "corpusUses": 28
+    },
+    {
+      "name": "ptmb",
+      "graces": [
+        "HG",
+        "B",
+        "LG",
+        "D",
+        "LG",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "ptmb",
+      "corpusUses": 58
+    },
+    {
+      "name": "ptmc",
+      "graces": [
+        "HG",
+        "C",
+        "LG",
+        "D",
+        "LG",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "ptmc",
+      "corpusUses": 9
+    },
+    {
+      "name": "ptmd",
+      "graces": [
+        "HG",
+        "B",
+        "LG",
+        "D",
+        "C",
+        "D",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "ptmd",
+      "corpusUses": 16
+    },
+    {
+      "name": "ptra",
+      "graces": [
+        "LG",
+        "D",
+        "C"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "DT",
+      "canonical": "thrd",
+      "corpusUses": 25
+    },
+    {
+      "name": "ptra8",
+      "graces": [
+        "LG",
+        "D",
+        "C"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "DT",
+      "canonical": "thrd",
+      "corpusUses": 7
+    },
+    {
+      "name": "ptripb",
+      "graces": [
+        "HG",
+        "B",
+        "D",
+        "B",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "ptripb",
+      "corpusUses": 11
+    },
+    {
+      "name": "ptripc",
+      "graces": [
+        "HG",
+        "C",
+        "D",
+        "C",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "ptripc",
+      "corpusUses": 0
+    },
+    {
+      "name": "ptripla",
+      "graces": [
+        "HG",
+        "LA",
+        "D",
+        "LA",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "ptripla",
+      "corpusUses": 67
+    },
+    {
+      "name": "ptriplg",
+      "graces": [
+        "HG",
+        "LG",
+        "D",
+        "LG",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "ptriplg",
+      "corpusUses": 4
+    },
+    {
+      "name": "pttripb",
+      "graces": [
+        "HA",
+        "B",
+        "D",
+        "B",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "pttripb",
+      "corpusUses": 0
+    },
+    {
+      "name": "pttripc",
+      "graces": [
+        "HA",
+        "C",
+        "D",
+        "C",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "pttripc",
+      "corpusUses": 0
+    },
+    {
+      "name": "pttripla",
+      "graces": [
+        "HA",
+        "LA",
+        "D",
+        "LA",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "pttripla",
+      "corpusUses": 0
+    },
+    {
+      "name": "pttriplg",
+      "graces": [
+        "HA",
+        "LG",
+        "D",
+        "LG",
+        "E"
+      ],
+      "family": "Piobaireachd movements over or under the next note",
+      "beforeD": "D",
+      "canonical": "pttriplg",
+      "corpusUses": 0
+    }
+  ],
+  "notExpanded": [
+    "flick",
+    "hflick",
+    "sp2"
+  ]
+}
