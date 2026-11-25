@@ -74,3 +74,5 @@ independent and is not affiliated with or endorsed by any of them.
 The specification, the token tables and the examples are licensed under
 [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE). You may use them for any purpose, including in
 commercial software, as long as you give credit.
+
+Copyright (c) 2026 the BWW format specification contributors.
